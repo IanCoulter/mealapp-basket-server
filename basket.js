@@ -1,3 +1,4 @@
+console.log('BASKET VERSION: NEW SELECTORS v2');
 const { chromium } = require('playwright');
 
 async function fillBasket(items, sessionCookies) {
