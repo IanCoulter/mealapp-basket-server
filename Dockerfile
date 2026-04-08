@@ -25,7 +25,7 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 RUN npx playwright install chromium
-# force rebuild v4
+# force rebuild v5
 
 COPY . .
 
