@@ -37,9 +37,23 @@ async function addItem(page, item) {
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
 
+    // Debug: log page title and URL to see what Playwright is seeing
+    const title = await page.title();
+    console.log(` [DEBUG] ${name}: page title = "${title}", url = ${page.url()}`);
+
+    // Try to dismiss cookie banner if present
+    const cookieBtn = page.locator('button:has-text("Accept all cookies"), button:has-text("Accept cookies"), button[data-auto="accept-cookies"]').first();
+    try {
+      await cookieBtn.click({ timeout: 2000 });
+      console.log(` [DEBUG] ${name}: dismissed cookie banner`);
+      await page.waitForTimeout(500);
+    } catch (e) {
+      // No cookie banner, continue
+    }
+
     // Click the Add button using Tesco's data-auto attribute
     const addBtn = page.locator('button[data-auto="ddsweb-quantity-controls-add-button"]').first();
-    await addBtn.waitFor({ timeout: 8000 });
+    await addBtn.waitFor({ timeout: 10000 });
     await addBtn.click();
 
     // Wait for the quantity controls to appear
