@@ -36,28 +36,33 @@ async function addItem(page, item) {
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
 
-    // Set quantity if more than 1
-    if (quantity > 1) {
-      const qtyInput = page.locator([
-        'input[data-testid="quantity-input"]',
-        'input[name="quantity"]',
-        'input[type="number"]'
-      ].join(', ')).first();
+    // Click the Add button using Tesco's data-auto attribute
+    const addBtn = page.locator('button[data-auto="ddsweb-quantity-controls-add-button"]').first();
+    await addBtn.waitFor({ timeout: 8000 });
+    await addBtn.click();
 
-      if (await qtyInput.isVisible()) {
+    // Wait for the quantity controls to appear
+    await page.waitForTimeout(1000);
+
+    // If we need more than 1, set the quantity in the input field
+    if (quantity > 1) {
+      const qtyInput = page.locator('input[data-auto="ddsweb-quantity-controls-input"]').first();
+      if (await qtyInput.isVisible({ timeout: 3000 })) {
+        // Clear and type the quantity
         await qtyInput.fill(String(quantity));
+        // Press Enter to confirm the quantity
+        await qtyInput.press('Enter');
+        await page.waitForTimeout(800);
+      } else {
+        // If no input visible, click the plus button to increase quantity
+        const plusBtn = page.locator('button[data-auto="ddsweb-quantity-controls-add-button"]').first();
+        for (var i = 1; i < quantity; i++) {
+          await plusBtn.click();
+          await page.waitForTimeout(400);
+        }
       }
     }
 
-    // Click add to basket
-    const addButton = page.locator([
-      'button[data-testid="add-to-trolley-button"]',
-      'button:has-text("Add to trolley")',
-      'button:has-text("Add")'
-    ].join(', ')).first();
-
-    await addButton.waitFor({ timeout: 5000 });
-    await addButton.click();
     await page.waitForTimeout(600);
 
     console.log(` ✓ ${name} x${quantity}`);
